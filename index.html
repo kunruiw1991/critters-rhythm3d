@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>🥁🌟 Critter Rhythm Taiko 3D 🌟🥁</title>
+  <link rel="icon" href="icons/catnap.jpg" />
+  <link rel="preload" as="image" href="icons/catnap.jpg" />
+  <link rel="preload" as="image" href="icons/dogday.jpg" />
+  <link rel="preload" as="image" href="icons/picky.jpg" />
+  <link rel="preload" as="image" href="icons/craftycorn.jpg" />
+  <link rel="preload" as="image" href="icons/kickin.jpg" />
+  <link rel="preload" as="image" href="icons/bobby.jpg" />
+  <link rel="preload" as="image" href="icons/hoppy.jpg" />
+  <link rel="preload" as="image" href="icons/bubba.jpg" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Floating 2D Visual FX Layer (pure emoji & numbers, zero text) -->
+    <div id="fx-layer" aria-hidden="true"></div>
+
+    <!-- Top Visual HUD Bar -->
+    <header id="top-hud">
+      <!-- 8 Selectable Smiling Critters Rail -->
+      <div id="critter-rail" class="pill-rail" role="toolbar" aria-label="Critters"></div>
+
+      <!-- Center Concert Progress, Fever Gauge & 5-Critter Live Rank Strip -->
+      <div id="center-hud">
+        <div id="song-progress-wrap">
+          <span class="hud-icon">🎵</span>
+          <div id="song-progress-bar">
+            <div id="song-progress-fill"></div>
+          </div>
+          <span id="combo-badge" class="combo-pill">🔥 0</span>
+        </div>
+        <div id="fever-progress-wrap">
+          <span class="hud-icon">🌈</span>
+          <div id="fever-progress-bar">
+            <div id="fever-progress-fill"></div>
+          </div>
+          <span id="score-badge" class="score-pill">⭐ 0</span>
+        </div>
+        <div id="live-standings"></div>
+      </div>
+
+      <!-- 8 Concert Stages Rail + Utility Buttons -->
+      <div id="right-hud">
+        <div id="stage-rail" class="pill-rail" role="toolbar" aria-label="Stages"></div>
+        <div id="util-buttons">
+          <button id="btn-camera" class="icon-btn" aria-label="Camera">🎥1️⃣</button>
+          <button id="btn-sound" class="icon-btn" aria-label="Sound">🔊</button>
+          <button id="btn-restart" class="icon-btn" aria-label="Restart">🔄</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Zero-Text Start Gate & 4x2 Character Picker Overlay -->
+    <div id="start-overlay" class="start-overlay">
+      <div class="start-picker-card">
+        <div id="start-stage-badge" class="start-stage-badge">1 🌸 🥁</div>
+        <div id="start-critter-grid" class="start-critter-grid" role="radiogroup" aria-label="Pick Critter"></div>
+        <button id="btn-start-play" class="start-play-btn loading" aria-label="Play">
+          <span id="start-play-icons" class="start-icons">🥁 🌟 ▶️</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Zero-Text WebGL Fallback Banner (shown only if WebGL / Three.js fails) -->
+    <div id="webgl-fallback" class="modal-backdrop hidden">
+      <div class="podium-card">
+        <div style="font-size:48px">🥁 ⚠️ 🎮</div>
+      </div>
+    </div>
+
+    <!-- Bottom Zero-Text Visual Cockpit -->
+    <footer id="bottom-cockpit">
+      <!-- 3 Taiko Drum Hit Pads (Left Red, Center Gold, Right Blue) -->
+      <div id="drum-pad-cluster">
+        <button id="pad-0" class="drum-pad pad-red" data-lane="0" aria-label="Left Drum">
+          <span class="pad-ring"></span>
+          <span class="pad-emoji">🥁</span>
+          <span class="pad-arrow">⬅️</span>
+        </button>
+        <button id="pad-1" class="drum-pad pad-gold" data-lane="1" aria-label="Center Star Drum">
+          <span class="pad-ring"></span>
+          <span class="pad-emoji">⭐</span>
+          <span class="pad-arrow">⬆️</span>
+        </button>
+        <button id="pad-2" class="drum-pad pad-blue" data-lane="2" aria-label="Right Gem Drum">
+          <span class="pad-ring"></span>
+          <span class="pad-emoji">💎</span>
+          <span class="pad-arrow">➡️</span>
+        </button>
+      </div>
+
+      <!-- 3 Power Pedals -->
+      <div id="pedal-cluster">
+        <button id="pedal-0" class="power-pedal pedal-magnet" data-pedal="0" aria-label="Magnet Pedal">
+          <div class="pedal-cooldown-fill" id="pedal-fill-0"></div>
+          <span class="pedal-emoji">🌪️</span>
+          <span class="pedal-badge">1️⃣</span>
+        </button>
+        <button id="pedal-1" class="power-pedal pedal-fever" data-pedal="1" aria-label="Fever Encore Pedal">
+          <div class="pedal-cooldown-fill" id="pedal-fill-1"></div>
+          <span class="pedal-emoji">⚡</span>
+          <span class="pedal-badge">2️⃣</span>
+        </button>
+        <button id="pedal-2" class="power-pedal pedal-blast" data-pedal="2" aria-label="Mega Blast Pedal">
+          <div class="pedal-cooldown-fill" id="pedal-fill-2"></div>
+          <span class="pedal-emoji">💥</span>
+          <span class="pedal-badge">3️⃣</span>
+        </button>
+      </div>
+    </footer>
+
+    <!-- 5-Critter Podium Modal (100% Zero-Text Visual Icons, Portraits & Stars) -->
+    <div id="podium-modal" class="modal-backdrop hidden">
+      <div class="podium-card">
+        <div id="podium-crown-banner">🏆 ⭐⭐⭐</div>
+        <div id="podium-stage-stars" class="podium-stars-row"></div>
+        <div id="podium-bars" class="podium-bars-wrap"></div>
+        <div class="podium-actions">
+          <button id="btn-podium-critter" class="podium-btn critter-switch-btn" aria-label="Pick Critter">🐱🔄</button>
+          <button id="btn-podium-retry" class="podium-btn retry-btn" aria-label="Retry">🔄</button>
+          <button id="btn-podium-next" class="podium-btn next-btn" aria-label="Next Stage">▶️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/vendor/three.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
