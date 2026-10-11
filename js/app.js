@@ -2785,41 +2785,33 @@
   function updateVisuals(dt, nowSec) {
     if (state.contextLost) return;
 
-    // 1. Trauma Camera Shake + Spring-Damped Directional Kick
+    // 1. Subtle Spring-Damped Camera Bounce (Zero Rotational Shake)
     if (state.trauma > 0) {
-      state.trauma = Math.max(0, state.trauma - 1.6 * dt);
+      state.trauma = Math.max(0, state.trauma - 2.4 * dt);
     }
     const springK = 180;
-    const springC = 20;
+    const springC = 24;
 
     const accY = -springK * state.camSpringY - springC * state.camSpringVelY;
     state.camSpringVelY += accY * dt;
     state.camSpringY += state.camSpringVelY * dt;
 
-    const accP = -springK * state.camSpringPitch - springC * state.camSpringVelPitch;
-    state.camSpringVelPitch += accP * dt;
-    state.camSpringPitch += state.camSpringVelPitch * dt;
-
-    const accR = -springK * state.camSpringRoll - springC * state.camSpringVelRoll;
-    state.camSpringVelRoll += accR * dt;
-    state.camSpringRoll += state.camSpringVelRoll * dt;
+    state.camSpringVelPitch = 0;
+    state.camSpringPitch = 0;
+    state.camSpringVelRoll = 0;
+    state.camSpringRoll = 0;
 
     const motionScale = getMotionScale();
     const shakeStrength = state.trauma * state.trauma * motionScale;
-    const tau = Math.PI * 2;
-    const nP = Math.sin(nowSec * 17.0 * tau) * 0.55 + Math.sin(nowSec * 23.0 * tau + 1.3) * 0.30 + Math.sin(nowSec * 31.0 * tau + 2.7) * 0.15;
-    const nY = Math.cos(nowSec * 19.0 * tau + 0.5) * 0.55 + Math.sin(nowSec * 29.0 * tau + 2.1) * 0.45;
-    const nR = Math.sin(nowSec * 21.0 * tau + 1.1) * 0.60 + Math.cos(nowSec * 37.0 * tau + 0.4) * 0.40;
+    const offsetX = Math.sin(nowSec * 22.0) * 0.06 * shakeStrength;
+    const offsetY = Math.cos(nowSec * 27.0) * 0.05 * shakeStrength;
 
     camera.position.set(
-      fittedCameraPos.x,
-      fittedCameraPos.y + state.camSpringY,
+      fittedCameraPos.x + offsetX,
+      fittedCameraPos.y + state.camSpringY * 0.35 + offsetY,
       fittedCameraPos.z
     );
     camera.lookAt(fittedCameraLook);
-    camera.rotateX(state.camSpringPitch + shakeStrength * 0.015 * nP);
-    camera.rotateY(shakeStrength * 0.012 * nY);
-    camera.rotateZ(state.camSpringRoll + shakeStrength * 0.032 * nR);
 
     // 2. 3D Rainbow Fever Stage Transformation & Lane Strip Recovery
     const stage = STAGES[state.stageIndex];
